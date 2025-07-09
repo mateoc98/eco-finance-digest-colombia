@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Calendar, Download, Search, Filter, FileText, TrendingUp, Globe, MapPin } from "lucide-react";
+import { Calendar, Download, Search, Filter, FileText, TrendingUp, Globe, MapPin, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,17 +8,19 @@ import { Badge } from "@/components/ui/badge";
 import { NewsCard } from "@/components/NewsCard";
 import { PDFGenerator } from "@/components/PDFGenerator";
 import { NewsFilter } from "@/components/NewsFilter";
-import { mockNewsData } from "@/data/mockNews";
+import { useNewsData } from "@/hooks/useNewsData";
 
 const Index = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedRegion, setSelectedRegion] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
+  
+  const { data: newsData, isLoading, error } = useNewsData();
 
-  const filteredNews = mockNewsData.filter(article => {
-    const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         article.summary.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredNews = (newsData || []).filter(article => {
+    const matchesSearch = article.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         article.summary?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "all" || article.category === selectedCategory;
     const matchesRegion = selectedRegion === "all" || article.region === selectedRegion;
     
@@ -165,13 +167,30 @@ const Index = () => {
         </div>
 
         {/* News Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {filteredNews.map((article) => (
-            <NewsCard key={article.id} article={article} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <span className="ml-2 text-slate-600">Cargando noticias...</span>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <FileText className="h-12 w-12 text-red-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-slate-900 mb-2">
+              Error al cargar noticias
+            </h3>
+            <p className="text-slate-600">
+              {error.message || 'Intenta recargar la página'}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {filteredNews.map((article) => (
+              <NewsCard key={article.id} article={article} />
+            ))}
+          </div>
+        )}
 
-        {filteredNews.length === 0 && (
+        {!isLoading && !error && filteredNews.length === 0 && newsData?.length > 0 && (
           <div className="text-center py-12">
             <FileText className="h-12 w-12 text-slate-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-slate-900 mb-2">
