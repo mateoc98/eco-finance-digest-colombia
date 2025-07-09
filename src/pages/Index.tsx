@@ -43,10 +43,10 @@ const Index = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-slate-900">
-                  EcoFinance Digest Colombia
+                  IR Monitor Banco de Bogotá
                 </h1>
                 <p className="text-sm text-slate-600">
-                  Noticias Económicas y Financieras
+                  Seguimiento diario al entorno económico y bancario
                 </p>
               </div>
             </div>
